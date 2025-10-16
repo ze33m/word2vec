@@ -1,7 +1,12 @@
 dataset:
   window_size: 5
   negatives_number: 5
+  batch_size: 216
   DEBUG: True
   
-
+model:
+  embed_size: 128
   
+train:
+  lr: .001
+  epochs: 2

@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torch import optim
 from tqdm import tqdm
 import pickle 
+import torch
 import datetime
 
 def now():
@@ -31,14 +32,20 @@ dataset = NegativeSamplingDataset(dataset, window_size, negatives_number)
 
 dl = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-model = w2v_ns(dataset=dataset, embed_size=embed_size)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)
+
 opt = optim.Adam(model.parameters(), lr)
 
 def train():
-    print('Обучение')
+    print(f'Обучение на {device}')
     for epoch in tqdm(range(epochs)):
         total_loss = 0
         for target, context, negatives in tqdm(dl):
+            target = target.to(device)
+            context = context.to(device)
+            negatives = negatives.to(device)
             loss = model(target, context, negatives)
             opt.zero_grad()
             loss.backward()

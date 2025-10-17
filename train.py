@@ -7,6 +7,10 @@ from torch.utils.data import DataLoader
 from torch import optim
 from tqdm import tqdm
 import pickle 
+import datetime
+
+def now():
+    return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -31,7 +35,7 @@ model = w2v_ns(dataset=dataset, embed_size=embed_size)
 opt = optim.Adam(model.parameters(), lr)
 
 def train():
-    print('Обучение модели')
+    print('Обучение')
     for epoch in tqdm(range(epochs)):
         total_loss = 0
         for target, context, negatives in tqdm(dl):
@@ -42,7 +46,8 @@ def train():
             total_loss += loss.item() / batch_size
         print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
 
+
 if __name__ == "__main__":
     train()
-    with open('model.pkl', 'wb') as file:
+    with open(f'models/model{now()}.pkl', 'wb') as file:
         pickle.dump(model, file)

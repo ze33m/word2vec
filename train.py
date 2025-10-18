@@ -1,8 +1,8 @@
-from datasets import load_dataset
+
 import yaml
 from debug_dataset import debug_dataset
 from word2vec import w2v_ns
-from preprocess import NegativeSamplingDataset
+from dataset import NegativeSamplingDataset
 from torch.utils.data import DataLoader
 from torch import optim
 from tqdm import tqdm
@@ -16,10 +16,7 @@ def now():
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-if config['dataset']['DEBUG']:   
-    dataset = debug_dataset
-else:
-    dataset = load_dataset('0x7o/taiga', split='train')['text']
+
 
 window_size=config['dataset']['window_size']
 negatives_number=config['dataset']['negatives_number']
@@ -27,6 +24,9 @@ batch_size=config['dataset']['batch_size']
 embed_size=config['model']['embed_size']
 lr=config['train']['lr']
 epochs=config['train']['epochs']
+
+with open('dataset.pkl', 'rb') as f:
+    dataset = pickle.load(f)
 
 dataset = NegativeSamplingDataset(dataset, window_size, negatives_number)
 
@@ -53,8 +53,10 @@ def train():
             total_loss += loss.item() / batch_size
         print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
 
-
-if __name__ == "__main__":
-    train()
+def save():
     with open(f'models/model{now()}.pkl', 'wb') as file:
         pickle.dump(model, file)
+
+if __name__ == "__main__":
+    # train()
+    torch.save(dataset.__dict__, 'dataset.pt')

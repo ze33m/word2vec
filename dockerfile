@@ -11,4 +11,4 @@ COPY . .
 
 RUN mkdir -p models
 
-CMD ["python", "train.py"]
+CMD ["python", "prep.py"]

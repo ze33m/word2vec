@@ -9,14 +9,20 @@ from tqdm import tqdm
 import pickle 
 import torch
 import datetime
+import os
+
+def get_last_dataset():
+    file_names = []
+    files = [os.path.join("datasets", f) for f in os.listdir("datasets") if os.path.isfile(os.path.join("datasets", f))]
+    last_dataset = max(files, key=os.path.getmtime)
+    return last_dataset
+
 
 def now():
     return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
-
-
 
 window_size=config['dataset']['window_size']
 negatives_number=config['dataset']['negatives_number']
@@ -25,7 +31,7 @@ embed_size=config['model']['embed_size']
 lr=config['train']['lr']
 epochs=config['train']['epochs']
 
-with open('dataset.pkl', 'rb') as f:
+with open(get_last_dataset(), 'rb') as f:
     dataset = pickle.load(f)
 
 dataset = NegativeSamplingDataset(dataset, window_size, negatives_number)
@@ -58,5 +64,5 @@ def save():
         pickle.dump(model, file)
 
 if __name__ == "__main__":
-    # train()
-    torch.save(dataset.__dict__, 'dataset.pt')
+    train()
+    save()

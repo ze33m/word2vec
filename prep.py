@@ -37,7 +37,8 @@ if __name__ == '__main__':
     if config['dataset']['DEBUG']:   
         dataset = debug_dataset
     else:
-        dataset = load_dataset('0x7o/taiga', split='train')['text']
+        dataset = load_dataset('0x7o/taiga', split='train')
+        dataset = [item['text'] for item in tqdm(dataset, desc='Извлечение текстов')]
 
     docs = preprocess_docs(dataset)
 

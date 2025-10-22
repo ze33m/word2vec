@@ -16,10 +16,10 @@ def now():
     return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
 
 def preprocess_docs(raw_docs):
-    n_jobs = max(1, cpu_count() - 1)
-    with Pool(processes=n_jobs) as pool:
-        docs = list(tqdm(pool.imap(preprocessing, raw_docs), total=len(raw_docs)))
-    return docs
+        n_jobs = max(1, cpu_count() - 1)
+        with Pool(processes=n_jobs) as pool:
+            docs = list(tqdm(pool.imap(preprocessing, raw_docs), total=len(raw_docs)))
+            return docs
 
 def preprocessing(raw_text:str):
     raw_text = raw_text.lower()

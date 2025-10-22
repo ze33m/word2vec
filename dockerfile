@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+FROM pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime
 
 WORKDIR /app
 
@@ -11,4 +11,4 @@ COPY . .
 
 RUN mkdir -p models
 
-CMD ["python", "train.py"]
+CMD ["python", "prep.py"]

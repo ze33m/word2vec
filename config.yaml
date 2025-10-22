@@ -2,7 +2,7 @@ dataset:
   window_size: 5
   negatives_number: 5
   batch_size: 216
-  DEBUG: True
+  DEBUG: False
   
 model:
   embed_size: 128

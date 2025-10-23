@@ -7,6 +7,7 @@ import pickle
 from datasets import load_dataset
 import yaml
 import datetime
+
 from multiprocessing import Pool, cpu_count
 stop_words = set(stopwords.words('russian'))
 stemmer = SnowballStemmer("russian")
@@ -44,5 +45,6 @@ if __name__ == '__main__':
         remove_columns=["text"],
         desc="Preprocessing"
     )
-    dataset.save_to_disk('preprocessed/')
+    dataset.save_to_disk('preprocessed/taiga_preprocessed')
+
 

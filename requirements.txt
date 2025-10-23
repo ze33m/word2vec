@@ -2,3 +2,4 @@ torch
 nltk
 numpy
 datasets
+boto3

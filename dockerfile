@@ -11,4 +11,4 @@ COPY . .
 
 RUN mkdir -p models
 
-CMD ["python", "prep.py"]
+CMD ["bash", "-c", "python prep.py && python s3connect.py"]

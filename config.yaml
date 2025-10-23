@@ -2,7 +2,7 @@ dataset:
   window_size: 5
   negatives_number: 5
   batch_size: 216
-  DEBUG: False
+  DEBUG: True
   
 model:
   embed_size: 128
@@ -10,3 +10,7 @@ model:
 train:
   lr: .001
   epochs: 2
+
+s3:
+  id: 
+  key: 

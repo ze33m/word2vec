@@ -2,7 +2,6 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 from tqdm import tqdm
 import re
-from debug_dataset import debug_dataset
 import pickle
 from datasets import load_dataset
 import yaml
@@ -34,17 +33,20 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
 
     dataset = load_dataset('0x7o/taiga', split='train')
-    if config['dataset']['DEBUG']:   
-        dataset = dataset[:1000]
 
-    
+    if config['dataset']['DEBUG']:   
+        dataset = dataset.select(range(10))
+
+    print(type(dataset))
+
     dataset = dataset.map(
         preprocess_docs,
         batched=True,
         num_proc=max(1, cpu_count() - 1),
-        remove_columns=["text"],
+        remove_columns=["text", "source"],
         desc="Preprocessing"
     )
-    dataset.save_to_disk('preprocessed/taiga_preprocessed')
+    print(dataset)
+    dataset.save_to_disk('preprocessed')
 
 

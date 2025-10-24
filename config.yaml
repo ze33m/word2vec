@@ -10,7 +10,3 @@ model:
 train:
   lr: .001
   epochs: 2
-
-s3:
-  id: 
-  key: 

@@ -1,3 +1,6 @@
-.venv
-__pycache__
 .gitignore
+__pycache__/
+.venv/
+preprocessed/
+dataset/
+model/

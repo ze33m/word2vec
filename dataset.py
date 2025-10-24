@@ -4,7 +4,6 @@ from typing import Counter
 import numpy as np
 
 
-
 class NegativeSamplingDataset(Dataset):
     def __init__(self, docs, window_size, negatives_number):
         self.docs = docs

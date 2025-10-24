@@ -1,6 +1,5 @@
 
 import yaml
-from debug_dataset import debug_dataset
 from word2vec import w2v_ns
 from dataset import NegativeSamplingDataset
 from torch.utils.data import DataLoader
@@ -10,16 +9,17 @@ import pickle
 import torch
 import datetime
 import os
+from datasets import load_from_disk
 
-def get_last_dataset():
-    file_names = []
-    files = [os.path.join("datasets", f) for f in os.listdir("datasets") if os.path.isfile(os.path.join("datasets", f))]
-    last_dataset = max(files, key=os.path.getmtime)
-    return last_dataset
+with open('config.yaml', 'r') as f:
+    config = yaml.safe_load(f)
 
+dataset = load_from_disk("dataset")
 
-def now():
-    return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
+if config['dataset']['DEBUG']:   
+    dataset = dataset.select(range(10))
+
+print(dataset)
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -31,11 +31,10 @@ embed_size=config['model']['embed_size']
 lr=config['train']['lr']
 epochs=config['train']['epochs']
 
-with open(get_last_dataset(), 'rb') as f:
-    dataset = pickle.load(f)
 
-dataset = NegativeSamplingDataset(dataset, window_size, negatives_number)
 
+dataset = NegativeSamplingDataset(dataset['tokens'], window_size, negatives_number)
+print(dataset)
 dl = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -59,10 +58,8 @@ def train():
             total_loss += loss.item() / batch_size
         print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
 
-def save():
-    with open(f'models/model{now()}.pkl', 'wb') as file:
-        pickle.dump(model, file)
 
 if __name__ == "__main__":
     train()
-    save()
+    os.makedirs("model", exist_ok=True)
+    torch.save(model, 'model/model.pth')

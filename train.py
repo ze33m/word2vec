@@ -9,57 +9,70 @@ import pickle
 import torch
 import datetime
 import os
+from multiprocessing import cpu_count
 from datasets import load_from_disk
 
-with open('config.yaml', 'r') as f:
-    config = yaml.safe_load(f)
-
-dataset = load_from_disk("dataset")
-
-if config['dataset']['DEBUG']:   
-    dataset = dataset.select(range(10))
-
-print(dataset)
-
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
-
-window_size=config['dataset']['window_size']
-negatives_number=config['dataset']['negatives_number']
-batch_size=config['dataset']['batch_size']
-embed_size=config['model']['embed_size']
-lr=config['train']['lr']
-epochs=config['train']['epochs']
-
-
-
-dataset = NegativeSamplingDataset(dataset['tokens'], window_size, negatives_number)
-print(dataset)
-dl = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)
-
-opt = optim.Adam(model.parameters(), lr)
-
-def train():
-    print(f'Обучение на {device}')
-    for epoch in tqdm(range(epochs)):
-        total_loss = 0
-        for target, context, negatives in tqdm(dl):
-            target = target.to(device)
-            context = context.to(device)
-            negatives = negatives.to(device)
-            loss = model(target, context, negatives)
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
-            total_loss += loss.item() / batch_size
-        print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
-
+def create_collate_fn(dataset_obj):
+    def collate_fn(batch):
+        targets = torch.stack([i[0] for i in batch])
+        contexts = torch.stack([i[1] for i in batch])
+        negatives = torch.multinomial(
+            torch.from_numpy(dataset_obj.word_probs), 
+            dataset_obj.negatives_number * len(batch), 
+            replacement=True
+        ).view(len(batch), dataset_obj.negatives_number)
+        print(targets.shape, contexts.shape, negatives.shape)
+        return targets, contexts, negatives
+    return collate_fn
 
 if __name__ == "__main__":
+
+    with open('config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+
+    load_dataset = load_from_disk("dataset")
+
+    if config['dataset']['DEBUG']:   
+        load_dataset = load_dataset.select(range(100))
+
+    print(load_dataset)
+
+
+    window_size=config['dataset']['window_size']
+    negatives_number=config['dataset']['negatives_number']
+    batch_size=config['dataset']['batch_size']
+    embed_size=config['model']['embed_size']
+    lr=config['train']['lr']
+    epochs=config['train']['epochs']
+
+    
+
+    dataset = NegativeSamplingDataset(load_dataset['tokens'], window_size, negatives_number)
+    print(dataset)
+    collate_fn = create_collate_fn(dataset)
+
+    dl = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers = max(1, cpu_count() - 1))
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)
+
+    opt = optim.Adam(model.parameters(), lr)
+
+    def train():
+        print(f'Обучение на {device}')
+        for epoch in tqdm(range(epochs)):
+            total_loss = 0
+            for target, context, negatives in tqdm(dl):
+                target = target.to(device)
+                context = context.to(device)
+                negatives = negatives.to(device)
+                loss = model(target, context, negatives)
+                opt.zero_grad()
+                loss.backward()
+                opt.step()
+                total_loss += loss.item() / batch_size
+            print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
+
     train()
     os.makedirs("model", exist_ok=True)
     torch.save(model, 'model/model.pth')

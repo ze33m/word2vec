@@ -14,6 +14,7 @@ class NegativeSamplingDataset(Dataset):
         self.calc_word_probs()
 
     def converts(self):
+        print('converts...')
         self.tokens = []
         for tokens in self.docs:
             self.tokens += tokens
@@ -24,6 +25,7 @@ class NegativeSamplingDataset(Dataset):
 
     def make_dataset(self):
         targets, contexts = [], []
+        print('making dataset...')
         for tokens in tqdm(self.docs):
             for i in range(self.window_size, len(tokens) - self.window_size):
                 target = self.wtoi[tokens[i]]
@@ -36,6 +38,7 @@ class NegativeSamplingDataset(Dataset):
         self.contexts = torch.LongTensor(contexts)
 
     def calc_word_probs(self):
+        print('calc_word_probs...')
         freqs = Counter(self.tokens)
         self.word_probs = np.array(
             [freqs[w]**0.75 for w in self.vocab], dtype=np.float32

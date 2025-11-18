@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import torch
 from typing import Counter
 import numpy as np
-
+from tqdm import tqdm
 
 class NegativeSamplingDataset(Dataset):
     def __init__(self, docs, window_size, negatives_number):
@@ -24,7 +24,7 @@ class NegativeSamplingDataset(Dataset):
 
     def make_dataset(self):
         targets, contexts = [], []
-        for tokens in self.docs:
+        for tokens in tqdm(self.docs):
             for i in range(self.window_size, len(tokens) - self.window_size):
                 target = self.wtoi[tokens[i]]
                 context = [self.wtoi[j] for j in tokens[i - self.window_size : i + self.window_size + 1]]

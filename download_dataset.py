@@ -8,7 +8,7 @@ files_path = "preprocessed"
 
 s3 = boto3.client(
     's3',
-    endpoint_url=os.getenv('ENDPOINT_URL'),
+    endpoint_url=os.getenv('ENDPOINT_URL'), 
     aws_access_key_id=os.getenv('KEY_ID'),
     aws_secret_access_key=os.getenv('ACCESS_KEY')
 )

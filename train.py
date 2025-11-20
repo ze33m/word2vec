@@ -11,19 +11,18 @@ import datetime
 import os
 from multiprocessing import cpu_count
 from datasets import load_from_disk
+from functools import partial
 
-def create_collate_fn(dataset_obj):
-    def collate_fn(batch):
+def collate_fn(batch, dataset):
         targets = torch.stack([i[0] for i in batch])
         contexts = torch.stack([i[1] for i in batch])
         negatives = torch.multinomial(
-            torch.from_numpy(dataset_obj.word_probs), 
-            dataset_obj.negatives_number * len(batch), 
+            torch.from_numpy(dataset.word_probs), 
+            dataset.negatives_number * len(batch), 
             replacement=True
-        ).view(len(batch), dataset_obj.negatives_number)
-        print(targets.shape, contexts.shape, negatives.shape)
+        ).view(len(batch), dataset.negatives_number)
+
         return targets, contexts, negatives
-    return collate_fn
 
 if __name__ == "__main__":
 
@@ -45,13 +44,14 @@ if __name__ == "__main__":
     lr=config['train']['lr']
     epochs=config['train']['epochs']
 
-    
-
     dataset = NegativeSamplingDataset(load_dataset['tokens'], window_size, negatives_number)
     print(dataset)
-    collate_fn = create_collate_fn(dataset)
 
-    dl = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers = max(1, cpu_count() - 1))
+    
+
+    custom_collate_fn = partial(collate_fn, dataset=dataset)
+
+    dl = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=custom_collate_fn, num_workers = max(1, cpu_count() - 1))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)

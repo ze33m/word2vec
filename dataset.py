@@ -4,6 +4,7 @@ from typing import Counter
 import numpy as np
 from tqdm import tqdm
 import bisect
+import time
 
 class NegativeSamplingDataset(Dataset):
     def __init__(self, docs, window_size, negatives_number):
@@ -14,31 +15,26 @@ class NegativeSamplingDataset(Dataset):
 
     def make_dataset(self):
         self.valid_pos = []
-        self.vocab = set()
         token_freqs = Counter()
-        for doc_idx, tokens in enumerate(tqdm(self.docs, desc='counting pairs')):
-            self.vocab.update(tokens)
-            token_freqs.update(tokens)
+        for doc_idx, token_ids in enumerate(tqdm(self.docs, desc='counting pairs')):
 
-            if len(tokens) > 2 * self.window_size:
-                valid_count = len(tokens) - 2 * self.window_size
+            token_freqs.update(token_ids)
+
+            if len(token_ids) > 2 * self.window_size:
+                valid_count = len(token_ids) - 2 * self.window_size
                 self.valid_pos.append((doc_idx, valid_count))
 
         self.cum_pairs = [0]
 
         for doc_idx, valid_count in self.valid_pos:
             self.cum_pairs.append(self.cum_pairs[-1] + valid_count * 2 * self.window_size)
+        self.vocab_size = len(token_freqs)
 
-        self.vocab = list(self.vocab)
-        self.wtoi = {word: i for i, word in enumerate(self.vocab)}
-        self.itow = {i: word for i, word in enumerate(self.vocab)}
-        self.vocab_size = len(self.vocab)
-
-        self.word_probs = np.array(
-            [token_freqs[w]**0.75 for w in self.vocab], dtype=np.float32
+        self.word_probs = torch.tensor(
+            [token_freqs[w]**0.75 for w in range(self.vocab_size)], dtype=torch.float32
         )
         self.word_probs /= self.word_probs.sum()
-
+       
 
     def __len__(self):
         return self.cum_pairs[-1]
@@ -54,8 +50,7 @@ class NegativeSamplingDataset(Dataset):
         context_offset = offset_in_doc%(self.window_size * 2)
 
         target_pos = self.window_size + pair_in_doc
-        target_word = tokens[target_pos]
-        target_id = self.wtoi[target_word]
+        target_id = tokens[target_pos]
 
         left = target_pos - self.window_size
         right = target_pos + self.window_size
@@ -63,7 +58,5 @@ class NegativeSamplingDataset(Dataset):
         contexts.remove(target_pos)
 
         context_pos = contexts[context_offset]
-        context_word = tokens[context_pos]
-        context_id = self.wtoi[context_word]
-
+        context_id = tokens[context_pos]
         return torch.tensor(target_id, dtype=torch.long), torch.tensor(context_id, dtype=torch.long)

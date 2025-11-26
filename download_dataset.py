@@ -2,8 +2,7 @@ import boto3
 from tqdm import tqdm
 import yaml
 import os
-bucket_name = "taiga"
-files_path = "preprocessed"
+bucket_name = "int-taiga"
 
 
 s3 = boto3.client(
@@ -16,7 +15,7 @@ s3 = boto3.client(
 contents = s3.list_objects_v2(Bucket=bucket_name)['Contents']
 keys = [contents[i]['Key'] for i in range(len(contents))]
 
-os.makedirs("dataset", exist_ok=True)
+os.makedirs("dataset", exist_ok=True)   
 
 for key in keys:
     s3.download_file(bucket_name, key, f'dataset/{key}')

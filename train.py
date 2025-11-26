@@ -17,7 +17,7 @@ def collate_fn(batch, dataset):
         targets = torch.stack([i[0] for i in batch])
         contexts = torch.stack([i[1] for i in batch])
         negatives = torch.multinomial(
-            torch.from_numpy(dataset.word_probs), 
+            dataset.word_probs, 
             dataset.negatives_number * len(batch), 
             replacement=True
         ).view(len(batch), dataset.negatives_number)
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     with open('config.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
-    load_dataset = load_from_disk("dataset")
+    load_dataset = load_from_disk("intdataset")
 
     if config['dataset']['DEBUG']:   
         load_dataset = load_dataset.select(range(100))
@@ -48,10 +48,10 @@ if __name__ == "__main__":
     print(dataset)
 
     
-
     custom_collate_fn = partial(collate_fn, dataset=dataset)
 
     dl = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=custom_collate_fn, num_workers = max(1, cpu_count() - 1))
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)
@@ -71,6 +71,7 @@ if __name__ == "__main__":
                 loss.backward()
                 opt.step()
                 total_loss += loss.item() / batch_size
+                pass
             print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
 
     train()

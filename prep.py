@@ -11,7 +11,6 @@ from multiprocessing import Pool, cpu_count
 stop_words = set(stopwords.words('russian'))
 stemmer = SnowballStemmer("russian")
 
-
 def now():
     return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
 
@@ -46,6 +45,7 @@ if __name__ == '__main__':
         remove_columns=["text", "source"],
         desc="Preprocessing"
     )
+
     print(dataset)
     dataset.save_to_disk('preprocessed')
 

@@ -14,7 +14,7 @@ if __name__ == '__main__':
         load_dataset = load_dataset.select(range(100))
         
     counter = Counter()
-    for tokens in tqdm(load_dataset['tokens']):
+    for tokens in tqdm(load_dataset['tokens'], desc='making vocab'):
         counter.update(tokens)
 
     vocab = {token : i for i,(token,_) in enumerate(counter.items())}

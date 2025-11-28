@@ -32,7 +32,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
 
     dataset = load_dataset('0x7o/taiga', split='train')
-
+    
     if config['dataset']['DEBUG']:   
         dataset = dataset.select(range(10))
 

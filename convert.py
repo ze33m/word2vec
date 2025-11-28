@@ -3,6 +3,7 @@ from multiprocessing import cpu_count
 from collections import Counter #Strike 
 from tqdm import tqdm
 import yaml
+import json
 
 if __name__ == '__main__':
     load_dataset = load_from_disk("dataset")
@@ -18,21 +19,24 @@ if __name__ == '__main__':
 
     vocab = {token : i for i,(token,_) in enumerate(counter.items())}
 
-    def convert_docs(batch, vocab):
-        return {
-            "tokens": [
-                [vocab[token] for token in doc]
-                for doc in batch["tokens"]
-            ]
-        }
+    # def convert_docs(batch, vocab):
+    #     return {
+    #         "tokens": [
+    #             [vocab[token] for token in doc]
+    #             for doc in batch["tokens"]
+    #         ]
+    #     }
 
-    dataset = load_dataset.map(
-            convert_docs,
-            batched=True,
-            fn_kwargs={"vocab": vocab},
-            num_proc=max(1, cpu_count() - 1),
-            desc="Converting"
-        )
+    # dataset = load_dataset.map(
+    #         convert_docs,
+    #         batched=True,
+    #         fn_kwargs={"vocab": vocab},
+    #         num_proc=max(1, cpu_count() - 1),
+    #         desc="Converting"
+    #     )
 
-    print(dataset)
-    dataset.save_to_disk('intdataset')
+    # print(dataset)
+    # dataset.save_to_disk('intdataset')
+
+    with open('vocab.json', 'w') as f:
+        json.dump(vocab, f)

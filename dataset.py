@@ -14,49 +14,15 @@ class NegativeSamplingDataset(Dataset):
         self.make_dataset()
 
     def make_dataset(self):
-        self.valid_pos = []
-        token_freqs = Counter()
-        for doc_idx, token_ids in enumerate(tqdm(self.docs, desc='counting pairs')):
-
-            token_freqs.update(token_ids)
-
-            if len(token_ids) > 2 * self.window_size:
-                valid_count = len(token_ids) - 2 * self.window_size
-                self.valid_pos.append((doc_idx, valid_count))
-
-        self.cum_pairs = [0]
-
-        for doc_idx, valid_count in self.valid_pos:
-            self.cum_pairs.append(self.cum_pairs[-1] + valid_count * 2 * self.window_size)
-        self.vocab_size = len(token_freqs)
-
-        self.word_probs = torch.tensor(
-            [token_freqs[w]**0.75 for w in range(self.vocab_size)], dtype=torch.float32
-        )
-        self.word_probs /= self.word_probs.sum()
+        targets = torch.tensor(data=[],dtype=torch.long)
+        contexts = torch.tensor(data=[],dtype=torch.long)
+        for doc in self.docs:
+            for i in range(self.window_size + 1, len(doc) - self.window_size):
+                     pass
        
 
     def __len__(self):
-        return self.cum_pairs[-1]
+        pass
     
     def __getitem__(self, i):
-        doc_idx = bisect.bisect_right(self.cum_pairs, i) - 1
-        offset_in_doc = i - self.cum_pairs[doc_idx]
-
-        doc_id, valid_count = self.valid_pos[doc_idx]
-        tokens = self.docs[doc_id]
-
-        pair_in_doc = offset_in_doc//(self.window_size * 2)
-        context_offset = offset_in_doc%(self.window_size * 2)
-
-        target_pos = self.window_size + pair_in_doc
-        target_id = tokens[target_pos]
-
-        left = target_pos - self.window_size
-        right = target_pos + self.window_size
-        contexts = list(range(left, right + 1))
-        contexts.remove(target_pos)
-
-        context_pos = contexts[context_offset]
-        context_id = tokens[context_pos]
-        return torch.tensor(target_id, dtype=torch.long), torch.tensor(context_id, dtype=torch.long)
+        pass

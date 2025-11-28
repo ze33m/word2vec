@@ -2,7 +2,7 @@ import boto3
 from tqdm import tqdm
 import yaml
 import os
-bucket_name = "int-taiga"
+bucket_name = "numpy-taiga"
 files_path = "intdataset"
 
 with open('config.yaml', 'r') as f:

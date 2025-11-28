@@ -11,4 +11,4 @@ COPY . .
 
 RUN mkdir -p models
 
-CMD ["bash", "-c", "python download_dataset.py && python train.py && python upload_model.py"]
+CMD ["bash", "-c", "python download_dataset.py && python convert.py && python upload_dataset.py"]

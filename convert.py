@@ -3,7 +3,9 @@ from multiprocessing import cpu_count
 from collections import Counter #Strike 
 from tqdm import tqdm
 import yaml
-
+import numpy as np
+import torch 
+import numpy as np
 if __name__ == '__main__':
     load_dataset = load_from_disk("dataset")
     with open('config.yaml', 'r') as f:
@@ -12,16 +14,16 @@ if __name__ == '__main__':
     if config['dataset']['DEBUG']:   
         load_dataset = load_dataset.select(range(100))
         
-    counter = Counter()
-    for tokens in tqdm(load_dataset['tokens']):
-        counter.update(tokens)
+    # counter = Counter()
+    # for tokens in tqdm(load_dataset['tokens']):
+    #     counter.update(tokens)
 
-    vocab = {token : i for i,(token,_) in enumerate(counter.items())}
+    # vocab = {token : i for i,(token,_) in enumerate(counter.items())}
 
     def convert_docs(batch, vocab):
         return {
             "tokens": [
-                [vocab[token] for token in doc]
+                np.array(doc, dtype=np.int64)
                 for doc in batch["tokens"]
             ]
         }
@@ -29,10 +31,9 @@ if __name__ == '__main__':
     dataset = load_dataset.map(
             convert_docs,
             batched=True,
-            fn_kwargs={"vocab": vocab},
             num_proc=max(1, cpu_count() - 1),
             desc="Converting"
         )
 
-    print(dataset)
+    print(dataset[:3])
     dataset.save_to_disk('intdataset')

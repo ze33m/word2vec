@@ -14,30 +14,11 @@ class NegativeSamplingDataset(Dataset):
         self.make_dataset()
 
     def make_dataset(self):
-        self.valid_pos = []
-        token_freqs = Counter()
-        for doc_idx, token_ids in enumerate(tqdm(self.docs, desc='counting pairs')):
-
-            token_freqs.update(token_ids)
-
-            if len(token_ids) > 2 * self.window_size:
-                valid_count = len(token_ids) - 2 * self.window_size
-                self.valid_pos.append((doc_idx, valid_count))
-
-        self.cum_pairs = [0]
-
-        for doc_idx, valid_count in self.valid_pos:
-            self.cum_pairs.append(self.cum_pairs[-1] + valid_count * 2 * self.window_size)
-        self.vocab_size = len(token_freqs)
-
-        self.word_probs = torch.tensor(
-            [token_freqs[w]**0.75 for w in range(self.vocab_size)], dtype=torch.float32
-        )
-        self.word_probs /= self.word_probs.sum()
+        pass
        
 
     def __len__(self):
-        return self.cum_pairs[-1]
+        return self.cum_pairs[-1] #cum t-shirt
     
     def __getitem__(self, i):
         doc_idx = bisect.bisect_right(self.cum_pairs, i) - 1

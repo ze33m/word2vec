@@ -37,7 +37,7 @@ if __name__ == "__main__":
     print(load_dataset)
 
 
-    window_size=config['dataset']['window_size']
+    window_size=config['dataset']['window_size'] 
     negatives_number=config['dataset']['negatives_number']
     batch_size=config['dataset']['batch_size']
     embed_size=config['model']['embed_size']

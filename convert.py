@@ -39,4 +39,4 @@ if __name__ == '__main__':
     # dataset.save_to_disk('intdataset')
 
     with open('vocab.json', 'w', encoding='utf-8') as f:
-        json.dump(vocab, f)
+        json.dump(vocab, f, ensure_ascii=False)

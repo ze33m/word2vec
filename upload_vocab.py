@@ -15,6 +15,6 @@ s3 = boto3.client(
 )
 
 
-with open('vocab.json', "rb") as f:
+with open('vocab.json', "rb", encoding='utf-8') as f:
     s3.upload_fileobj(f, bucket_name,'vocab.json')
 print("Все файлы датасета загружены в s3")

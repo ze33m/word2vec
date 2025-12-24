@@ -28,7 +28,7 @@ class NegativeSamplingDataset(Dataset):
 
         for doc_idx, valid_count in self.valid_pos:
             self.cum_pairs.append(self.cum_pairs[-1] + valid_count * 2 * self.window_size)
-        self.vocab_size = len(token_freqs)
+        self.vocab_size = max(token_freqs.keys()) + 1
 
         self.word_probs = torch.tensor(
             [token_freqs[w]**0.75 for w in range(self.vocab_size)], dtype=torch.float32

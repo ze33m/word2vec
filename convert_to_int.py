@@ -6,6 +6,7 @@ import yaml
 import json
 
 if __name__ == '__main__':
+    # 
     load_dataset = load_from_disk("dataset")
     with open('config.yaml', 'r') as f:
             config = yaml.safe_load(f)

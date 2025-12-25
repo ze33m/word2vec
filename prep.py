@@ -1,20 +1,17 @@
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
-from tqdm import tqdm
 import re
-import pickle
 from datasets import load_dataset
 import yaml
-import datetime
+from multiprocessing import cpu_count
 
-from multiprocessing import Pool, cpu_count
 stop_words = set(stopwords.words('russian'))
 stemmer = SnowballStemmer("russian")
 
-def now():
-    return str(datetime.datetime.now()).replace(' ', '_').replace(':', '_')
-
 def preprocessing(raw_text:str):
+    """
+    Функция для предобработки одной строчки
+    """
     raw_text = raw_text.lower()
     raw_text = re.sub(r'[^\w\s]|\d', '', raw_text) 
     raw_text = raw_text.replace('\n', ' ')
@@ -23,11 +20,15 @@ def preprocessing(raw_text:str):
     return tokens
 
 def preprocess_docs(batch):
+    """
+    Функция для предобработки всех строчек
+    """
     texts = batch["text"]
     processed = [preprocessing(i) for i in texts]
     return {"tokens" : processed}
 
 if __name__ == '__main__':
+
     with open("config.yaml", "r") as f:
         config = yaml.safe_load(f)
 
@@ -38,6 +39,7 @@ if __name__ == '__main__':
 
     print(type(dataset))
 
+    # применение preprocess_docs к нашему датасету с распараллеливанием
     dataset = dataset.map(
         preprocess_docs,
         batched=True,

@@ -49,6 +49,6 @@ if __name__ == '__main__':
     )
 
     print(dataset)
-    dataset.save_to_disk('preprocessed')
+    dataset.save_to_disk('dataset')
 
 

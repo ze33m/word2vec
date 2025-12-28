@@ -4,9 +4,14 @@ import re
 from datasets import load_dataset
 import yaml
 from multiprocessing import cpu_count
+"""
+taiga   --->   dataset/
+
+Первичная предобработка текста из исходного датасета
+"""
+
 
 stop_words = set(stopwords.words('russian'))
-stemmer = SnowballStemmer("russian")
 
 def preprocessing(raw_text:str):
     """
@@ -16,7 +21,7 @@ def preprocessing(raw_text:str):
     raw_text = re.sub(r'[^\w\s]|\d', '', raw_text) 
     raw_text = raw_text.replace('\n', ' ')
     raw_text = re.sub(r'[\s]+', ' ', raw_text)
-    tokens = [stemmer.stem(i) for i in raw_text.split() if i not in stop_words]
+    tokens = [i for i in raw_text.split() if i not in stop_words and len(i) > 1]
     return tokens
 
 def preprocess_docs(batch):

@@ -2,7 +2,7 @@ dataset:
   window_size: 5
   negatives_number: 5
   batch_size: 1000
-  DEBUG: True
+  DEBUG: False
   min_count: 10
   
 model:

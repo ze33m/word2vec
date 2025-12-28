@@ -1,10 +1,8 @@
 from torch.utils.data import Dataset
 import torch
 from typing import Counter
-import numpy as np
 from tqdm import tqdm
 import bisect
-import time
 
 class NegativeSamplingDataset(Dataset):
     def __init__(self, docs, window_size, negatives_number):

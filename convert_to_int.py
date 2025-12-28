@@ -4,6 +4,11 @@ from collections import Counter #Strike
 from tqdm import tqdm
 import yaml
 import json
+"""
+dataset/   --->   intdataset/
+
+Преобразование токенов в int + vocab
+"""
 
 if __name__ == '__main__':
     load_dataset = load_from_disk("dataset")
@@ -27,6 +32,7 @@ if __name__ == '__main__':
     for i, (token,_) in enumerate(items, start=1):
          vocab[token] = i
 
+    print(len(vocab))
     with open("vocab.json", "w", encoding='utf-8') as f:
         json.dump(vocab, f, ensure_ascii=False)
     

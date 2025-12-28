@@ -6,3 +6,5 @@ model/
 intdataset/
 numpydataset/
 pairs/
+test.Ipynb
+vocab.json

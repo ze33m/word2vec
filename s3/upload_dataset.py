@@ -4,8 +4,8 @@ import os
 Загрузить датасет в S3 хранилище
 """
 
-bucket_name = "pairs-dataset" # изменить, если надо загрузить в другой бакет
-dataset_folder = "pairs" # папка, в которой хранится датасет
+bucket_name = "vocab" # изменить, если надо загрузить в другой бакет
+dataset_folder = "vocab" # папка, в которой хранится датасет
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATASET_DIR = os.path.join(BASE_DIR, dataset_folder)

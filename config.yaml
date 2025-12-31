@@ -10,4 +10,4 @@ model:
   
 train:
   lr: .001
-  epochs: 1
+  epochs: 10

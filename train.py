@@ -1,39 +1,11 @@
 
 import yaml
 from word2vec import w2v_ns
-from dataset import nsDATASET
-from torch.utils.data import DataLoader
+from dataset import PairsStream
 from torch import optim
 from tqdm import tqdm
 import torch
 import os
-from datasets import load_from_disk
-
-
-import pyarrow.parquet as pq
-import torch
-from tqdm import tqdm
-import pyarrow.parquet as pq
-import torch
-from torch.utils.data import IterableDataset
-
-class PairsStream(IterableDataset):
-    def __init__(self, path, batch_size, neg_num, probs_path="neg_sampling_probs.pt"):
-        super().__init__()
-        self.path = path
-        self.batch_size = batch_size
-        self.neg_num = neg_num
-        probs = torch.load(probs_path)
-        self.sampler = torch.distributions.Categorical(probs)
-
-    def __iter__(self):
-        pf = pq.ParquetFile(self.path)
-        for rb in pf.iter_batches(batch_size=self.batch_size, columns=["target", "context"]):
-            # writable copy, чтобы не было warning и странных эффектов
-            t = torch.from_numpy(rb.column("target").to_numpy(zero_copy_only=False).copy())
-            c = torch.from_numpy(rb.column("context").to_numpy(zero_copy_only=False).copy())
-            n = self.sampler.sample((t.shape[0], self.neg_num))
-            yield t, c, n
 
 if __name__ == "__main__":
     with open('config.yaml', 'r') as f:
@@ -46,14 +18,13 @@ if __name__ == "__main__":
     lr=config['train']['lr']
     epochs=config['train']['epochs']
 
-    dataset = nsDATASET(batch_size=int(1e6))
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = w2v_ns(dataset=dataset, embed_size=embed_size).to(device)
+    model = w2v_ns(embed_size=embed_size).to(device)
 
-    opt = optim.SGD(model.parameters(), lr)
-    
+    opt = optim.Adam(model.parameters(), lr)
+    # пока попробуем обучить на 50млн парах. посмотрим, все ли работает и обучится ли он чему 
     stream = PairsStream("pairs/shard-00000.parquet", batch_size=300_000, neg_num=5)
 
     def train():

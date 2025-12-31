@@ -1,30 +1,20 @@
-from torch.utils.data import Dataset
-from datasets import load_dataset
 import torch
+import pyarrow.parquet as pq
+from torch.utils.data import IterableDataset
 
-class nsDATASET(Dataset):
-    def get_shard_name(self):
-        shard_id = str(self.shard_id)
-        while len(shard_id) != 5:
-            shard_id = '0' + shard_id
-        return f'pairs/shard-{shard_id}.parquet'
-
-    def __init__(self, shard=0, batch_size=1000, neg_num=5):
-        self.shard_id = shard
+class PairsStream(IterableDataset):
+    def __init__(self, path, batch_size, neg_num, probs_path="vocab/neg_sampling_probs.pt"):
+        super().__init__()
+        self.path = path
         self.batch_size = batch_size
         self.neg_num = neg_num
-        self.shard = load_dataset(
-            "parquet",
-            data_files = self.get_shard_name(),
-            split="train"
-        )
-        word_probs = torch.load("neg_sampling_probs.pt")
-        self.sampler = torch.distributions.Categorical(word_probs)
-    def __len__(self):
-        return len(self.shard)//self.batch_size
+        probs = torch.load(probs_path)
+        self.sampler = torch.distributions.Categorical(probs)
 
-    def __getitem__(self, idx):
-        idxs = range(idx*self.batch_size, (idx+1)*self.batch_size)
-        batch = self.shard.select(idxs).with_format("torch")
-        return batch["target"][:].to(torch.long), batch["context"][:].to(torch.long), self.sampler.sample((self.batch_size, self.neg_num)).to(torch.long)
-# вроде все сделал. должно заработать когда появится neg_sampling_probs.pt. проверить в test.ipynb 
+    def __iter__(self):
+        pf = pq.ParquetFile(self.path)
+        for rb in pf.iter_batches(batch_size=self.batch_size, columns=["target", "context"]):
+            t = torch.from_numpy(rb.column("target").to_numpy(zero_copy_only=False).copy())
+            c = torch.from_numpy(rb.column("context").to_numpy(zero_copy_only=False).copy())
+            n = self.sampler.sample((t.shape[0], self.neg_num))
+            yield t, c, n

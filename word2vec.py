@@ -2,9 +2,8 @@ from torch import nn
 import torch
 
 class w2v_ns(nn.Module):
-    def __init__(self, dataset, embed_size):
+    def __init__(self, embed_size):
         super().__init__()
-        self.dataset = dataset
         self.vocab_size = 2495767 # хардкод жоский
         self.target_emb = nn.Embedding(self.vocab_size, embed_size) 
         self.context_emb = nn.Embedding(self.vocab_size, embed_size)
@@ -21,7 +20,6 @@ class w2v_ns(nn.Module):
         return loss
     
     def K_nearest(self, x_idx, k):
-        
         x_vec = self.target_emb(torch.tensor(x_idx)).detach()
         all_vecs = self.target_emb.weight.detach()
         sims = nn.functional.cosine_similarity(x_vec.unsqueeze(0), all_vecs, dim=1)

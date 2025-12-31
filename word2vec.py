@@ -5,8 +5,8 @@ class w2v_ns(nn.Module):
     def __init__(self, embed_size):
         super().__init__()
         self.vocab_size = 2495767 # хардкод жоский
-        self.target_emb = nn.Embedding(self.vocab_size, embed_size) 
-        self.context_emb = nn.Embedding(self.vocab_size, embed_size)
+        self.target_emb = nn.Embedding(self.vocab_size, embed_size, sparse=True) 
+        self.context_emb = nn.Embedding(self.vocab_size, embed_size, sparse=True)
         self.log_sigmoid = nn.LogSigmoid()
         
     def forward(self, target, context, negatives) -> torch.Tensor:

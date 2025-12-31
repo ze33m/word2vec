@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     model = w2v_ns(embed_size=embed_size).to(device)
 
-    opt = optim.Adam(model.parameters(), lr)
+    opt = optim.SparseAdam(model.parameters(), lr)
     # пока попробуем обучить на 50млн парах. посмотрим, все ли работает и обучится ли он чему 
     stream = PairsStream("pairs/shard-00000.parquet", batch_size=300_000, neg_num=5)
 

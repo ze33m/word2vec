@@ -11,7 +11,7 @@ class s3con:
 
 
     def download(self,  bucket_name : str, folder : str):
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         DIR = os.path.join(BASE_DIR, folder)
 
         contents = self.s3.list_objects_v2(Bucket=bucket_name)['Contents']
@@ -32,7 +32,7 @@ class s3con:
                 print(f'загружен {path}')
 
     def upload(self,  bucket_name : str, folder : str):
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         DIR = os.path.join(BASE_DIR, folder)
 
         for file_name in os.listdir(DIR):

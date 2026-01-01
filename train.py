@@ -30,7 +30,7 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = w2v_ns(embed_size=embed_size).to(device)
-
+    s3 = s3con()
     opt = optim.SparseAdam(model.parameters(), lr)
     os.makedirs("model", exist_ok=True)
     s3 = s3con()
@@ -50,4 +50,5 @@ if __name__ == "__main__":
                 total_loss += loss.item() / batch_size
             print(f'shard num: {i+1}, loss value: {total_loss:.3f}')
             torch.save(model.state_dict(), f'model/model_{i}.pth')
+            s3.upload('taiga-model', 'model')
     train()

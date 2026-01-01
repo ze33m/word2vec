@@ -26,6 +26,11 @@ class s3con:
 
         print('Скачан весь датасет')
 
+    def upload_one(self, bucket_name : str, path : str):
+        with open(path, "rb") as f:
+                self.s3.upload_fileobj(f, bucket_name, path)
+                print(f'загружен {path}')
+
     def upload(self,  bucket_name : str, folder : str):
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         DIR = os.path.join(BASE_DIR, folder)

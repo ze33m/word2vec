@@ -6,6 +6,14 @@ from torch import optim
 from tqdm import tqdm
 import torch
 import os
+from s3con import s3con
+
+def get_shard(i):
+    number = str(i)
+    while len(number) != 5:
+        number = '0' + number
+    return f"pairs/shard-{number}.parquet"
+
 
 if __name__ == "__main__":
     with open('config.yaml', 'r') as f:
@@ -24,12 +32,12 @@ if __name__ == "__main__":
     model = w2v_ns(embed_size=embed_size).to(device)
 
     opt = optim.SparseAdam(model.parameters(), lr)
-    # пока попробуем обучить на 50млн парах. посмотрим, все ли работает и обучится ли он чему 
-    stream = PairsStream("pairs/shard-00000.parquet", batch_size=300_000, neg_num=5)
-
+    os.makedirs("model", exist_ok=True)
+    s3 = s3con()
     def train():
         print(f'Обучение на {device}')
-        for epoch in tqdm(range(epochs)):
+        for i in tqdm(range(610)):
+            stream = PairsStream(get_shard(i), batch_size=300_000, neg_num=5)
             total_loss = 0
             for target, context, negatives in tqdm(stream):
                 target = target.to(device)
@@ -40,8 +48,6 @@ if __name__ == "__main__":
                 loss.backward()
                 opt.step()
                 total_loss += loss.item() / batch_size
-            print(f'Epoch num: {epoch+1}, loss value: {total_loss:.3f}')
-
+            print(f'shard num: {i+1}, loss value: {total_loss:.3f}')
+            torch.save(model.state_dict(), f'model/model_{i}.pth')
     train()
-    os.makedirs("model", exist_ok=True)
-    torch.save(model.state_dict(), 'model/model.pth')

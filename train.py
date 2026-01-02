@@ -49,6 +49,7 @@ if __name__ == "__main__":
                 opt.step()
                 total_loss += loss.item() / batch_size
             print(f'shard num: {i+1}, loss value: {total_loss:.3f}')
-            torch.save(model.state_dict(), f'model/model_{i}.pth')
-            s3.upload('taiga-model', 'model')
+            if i%100 == 0:
+                torch.save(model.state_dict(), f'model/model_{i}.pth')
+                s3.upload_one('taiga-model', f'model/model_{i}.pth')
     train()

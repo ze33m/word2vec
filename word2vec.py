@@ -27,5 +27,4 @@ class w2v_ns(nn.Module):
         indices = topk.indices.tolist()
         scores = topk.values.tolist()
         result = [(i, s) for i, s in zip(indices, scores) if i!=x_idx]
-        
         return result
